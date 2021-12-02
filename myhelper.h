@@ -92,7 +92,20 @@ public:
             return _ba.setNum(_numDec,16).toUpper();
         }
     }
-
+    // 十六进制字符串 转 int
+    static int Hex2Int(QString hex)
+    {
+        QByteArray _ba;
+        HexStringToByte(hex, _ba);
+        QString qnum =_ba.toHex().data();
+        int num = qnum.toInt(nullptr,16);
+        if(!(qnum.at(0)>='0'&&qnum.at(0)<='7')){
+            num = num & 0x7FFF;
+            num=32768-num;
+            num = num * -1;
+        }
+        return num;
+    }
     // 反转字符串
     static QString ReversalStr(QString &str)
     {
@@ -116,6 +129,61 @@ public:
         }
 
         return ip;
+    }
+
+    static char convertHexChar(char ch)
+    {
+        if ((ch >= '0') && (ch <= '9')) {
+            return ch - 0x30;
+        } else if ((ch >= 'A') && (ch <= 'F')) {
+            return ch - 'A' + 10;
+        } else if ((ch >= 'a') && (ch <= 'f')) {
+            return ch - 'a' + 10;
+        } else {
+            return (-1);
+        }
+    }
+
+    static QByteArray hexStrToByteArray(QString str)
+    {
+        QByteArray senddata;
+        int hexdata, lowhexdata;
+        int hexdatalen = 0;
+        int len = str.length();
+        senddata.resize(len / 2);
+        char lstr, hstr;
+
+        for (int i = 0; i < len;) {
+            hstr = str.at(i).toLatin1();
+
+            if (hstr == ' ') {
+                i++;
+                continue;
+            }
+
+            i++;
+
+            if (i >= len) {
+                break;
+            }
+
+            lstr = str.at(i).toLatin1();
+            hexdata = convertHexChar(hstr);
+            lowhexdata = convertHexChar(lstr);
+
+            if ((hexdata == 16) || (lowhexdata == 16)) {
+                break;
+            } else {
+                hexdata = hexdata * 16 + lowhexdata;
+            }
+
+            i++;
+            senddata[hexdatalen] = (char)hexdata;
+            hexdatalen++;
+        }
+
+        senddata.resize(hexdatalen);
+        return senddata;
     }
 
 };
